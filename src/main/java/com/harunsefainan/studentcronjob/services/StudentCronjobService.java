@@ -26,7 +26,7 @@ public class StudentCronjobService {
     private final IStudentCronjobRepository iStudentCronjobRepository;
     private final LogService logService;
     private Logger logger;
-    private StudentCronjobEntity studentEntity;
+    StudentCronjobEntity studentEntity = new StudentCronjobEntity();
 
     //@Scheduled(cron = "0 0 0 * * *")// günde 1 defa
     @Scheduled(fixedDelay = 10000)
@@ -34,7 +34,7 @@ public class StudentCronjobService {
      * Uygulamamız, servisten gelen başlangıç tarihi ve paket süresi bilgilerini kullanarak kalan süreyi hesaplar.
      * Bu hesaplama sonucunda günlük olarak bir kez veritabanını günceller ve kayıt eder.
      */
-    public void setRemainingTime() throws JsonProcessingException {
+    public void setRemainingDay() throws JsonProcessingException {
         String serverUrl = "http://localhost:8080/v1/api/students/getAll";
         String username = "user";
         String password = "user";
@@ -70,22 +70,24 @@ public class StudentCronjobService {
 
                         String formattedRemainingTime = "";
                         if (remainingTime.toDays() > 0 || remainingTime.toHoursPart() > 0 || remainingTime.toMinutesPart() > 0) {
-                            formattedRemainingTime = String.format("%dg%ds%dd", remainingTime.toDays(), remainingTime.toHoursPart(), remainingTime.toMinutesPart());// Kalan süreyi formatlı olarak yazdır
+                            formattedRemainingTime = String.format("%dd%dh%dm", remainingTime.toDays(), remainingTime.toHoursPart(), remainingTime.toMinutesPart());// Kalan süreyi formatlı olarak yazdır
                         } else {
-                            formattedRemainingTime = "0g0s0d";
+                            formattedRemainingTime = "0d0h0m";
                         }
+
                         studentEntity.setOid(oid);
                         studentEntity.setFirstName(item.get("firstName").asText());
                         studentEntity.setLastName(item.get("lastName").asText());
                         studentEntity.setTcNo(item.get("tcNo").asText());
                         studentEntity.setBirthDate(item.get("birthDate").asText());
+                        studentEntity.setRegistrationDate(item.get("registrationDate").asText());
                         studentEntity.setRemainingDay(formattedRemainingTime);
                         studentEntity.setCourseTime(courseTime);
                         studentEntity.setOptime(optime);
                         iStudentCronjobRepository.save(studentEntity);
-                        logService.generateLog(UUID.randomUUID().toString(), "setRemainingTime", true, studentEntity, "The remaining time has been successfully updated.");
+                        logService.generateLog(UUID.randomUUID().toString(), "setRemainingDay", true, studentEntity, "The remaining time has been successfully updated.");
                     } catch (Exception e) {
-                        logService.generateLog(UUID.randomUUID().toString(), "setRemainingTime", true, studentEntity, e.toString());
+                        logService.generateLog(UUID.randomUUID().toString(), "setRemainingDay", true, studentEntity, e.toString());
                     }
                 }
             } else {
