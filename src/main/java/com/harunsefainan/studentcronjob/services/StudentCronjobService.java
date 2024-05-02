@@ -28,11 +28,12 @@ public class StudentCronjobService {
     private Logger logger;
     StudentCronjobEntity studentEntity = new StudentCronjobEntity();
 
-    @Scheduled(cron = "0 0 0 * * *")// günde 1 defa
+
     /*
      * Uygulamamız, servisten gelen başlangıç tarihi ve paket süresi bilgilerini kullanarak kalan süreyi hesaplar.
      * Bu hesaplama sonucunda günlük olarak bir kez veritabanını günceller ve kayıt eder.
      */
+    @Scheduled(cron = "0 0 0 * * *")// günde 1 defa
     public void setRemainingDay() throws JsonProcessingException {
         String serverUrl = "http://localhost:8080/v1/api/students/getAll";
         String username = "user";
